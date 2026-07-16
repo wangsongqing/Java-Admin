@@ -1,0 +1,106 @@
+# ============================================
+# 权限配置（菜单 + 按钮 + API 权限统一配置）
+#
+# 修改此文件后重启应用，系统会自动同步到 sys_permission 表。
+# 幂等操作：已存在的权限（按 code 匹配）会更新，不存在的会插入。
+#
+# 字段说明：
+#   code        - 权限编码，全局唯一，如 system:user:add（必填）
+#   name        - 权限名称（必填）
+#   type        - 类型：menu-菜单 button-按钮 api-接口（必填）
+#   parentCode  - 父级权限的 code，顶级菜单填 "" 或省略（选填）
+#   icon        - 菜单图标（选填）
+#   path        - 路由地址（选填）
+#   component   - 组件路径（选填）
+#   sort        - 排序，默认 0（选填）
+#   status      - 状态：1-正常 0-禁用，默认 1（选填）
+# ============================================
+
+permissions:
+  definitions:
+    # ---------- 系统管理（顶级菜单） ----------
+    - code: system
+      name: 系统管理
+      type: menu
+      icon: Setting
+      sort: 1
+
+    # ---------- 用户管理 ----------
+    - code: system:user
+      name: 用户管理
+      type: menu
+      icon: User
+      path: /users
+      component: views/user/index
+      parentCode: system
+      sort: 1
+
+    - code: system:user:add
+      name: 新增用户
+      type: button
+      parentCode: system:user
+      sort: 1
+
+    - code: system:user:edit
+      name: 编辑用户
+      type: button
+      parentCode: system:user
+      sort: 2
+
+    - code: system:user:delete
+      name: 删除用户
+      type: button
+      parentCode: system:user
+      sort: 3
+
+    - code: system:user:reset
+      name: 重置密码
+      type: button
+      parentCode: system:user
+      sort: 4
+
+    - code: system:user:status
+      name: 切换状态
+      type: button
+      parentCode: system:user
+      sort: 5
+
+    - code: system:user:export
+      name: 导出用户
+      type: button
+      parentCode: system:user
+      sort: 6
+
+    # ---------- 角色管理 ----------
+    - code: system:role
+      name: 角色管理
+      type: menu
+      icon: UserFilled
+      path: /roles
+      component: views/role/index
+      parentCode: system
+      sort: 2
+
+    - code: system:role:add
+      name: 新增角色
+      type: button
+      parentCode: system:role
+      sort: 1
+
+    - code: system:role:edit
+      name: 编辑角色
+      type: button
+      parentCode: system:role
+      sort: 2
+
+    - code: system:role:delete
+      name: 删除角色
+      type: button
+      parentCode: system:role
+      sort: 3
+
+    - code: system:role:assign
+      name: 分配权限
+      type: button
+      parentCode: system:role
+      sort: 4

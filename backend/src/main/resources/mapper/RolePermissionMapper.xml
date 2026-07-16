@@ -34,4 +34,12 @@
           AND p.status = 1
     </select>
 
+    <delete id="deleteByPermissionIds">
+        DELETE FROM sys_role_permission
+        WHERE permission_id IN
+        <foreach collection="permissionIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+
 </mapper>

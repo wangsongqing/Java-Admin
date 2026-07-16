@@ -6,6 +6,9 @@ server:
 spring:
   application:
     name: java-admin
+  # 导入独立的权限配置文件，使 @ConfigurationProperties(prefix="permissions") 能绑定到数据
+  config:
+    import: "classpath:permissions.yml"
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
     url: jdbc:mysql://127.0.0.1:3306/java_admin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
@@ -66,6 +69,12 @@ sa-token:
     - /auth/register
     - /error
     - /favicon.ico
+
+# 权限同步配置（permissions.yml → sys_permission 表）
+permissions:
+  # 是否同步删除：true = YAML 中不存在的权限会从数据库级联删除（默认 false）
+  # ⚠️ 开启前请确认 YAML 是权限的唯一来源，避免误删手动配置的权限
+  sync-delete: false
 
 # 日志
 logging:

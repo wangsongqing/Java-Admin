@@ -99,6 +99,50 @@ Java-Admin/
 - 分页：`pageNum` + `pageSize`，返回 `{ records, total }`
 - 密码：BCrypt 加密，`passwordEncoder.matches()` 校验，`passwordEncoder.encode()` 加密
 
+## 权限配置（permissions.yml）
+
+权限通过 `backend/src/main/resources/permissions.yml` 集中定义，应用启动时由
+`PermissionSyncRunner`（CommandLineRunner）自动同步到 `sys_permission` 表。
+
+### 操作方式
+1. 在 `permissions.yml` 的 `permissions.definitions` 列表中新增/修改/删除一条定义
+2. 重启应用即可（Flyway 迁移完成后自动执行同步）
+
+### 改名
+直接修改 YAML 中的 `name`，重启后自动 `UPDATE`（按 `code` 匹配）。
+
+### 删除
+默认不会删除（安全模式）。如需自动级联删除：
+1. 将 `application.yml` 中的 `permissions.sync-delete` 设为 `true`
+2. 从 `permissions.yml` 中移除对应权限定义
+3. 重启应用 → 该权限及其所有子孙权限会自动从数据库清除（先清 `sys_role_permission` 关联，再删 `sys_permission` 记录）
+
+> ⚠️ `sync-delete: true` 表示 YAML 是权限的唯一来源。开启前请确认没有通过其他方式（如管理界面）手动配置权限，否则会被误删。
+
+### 幂等策略
+- 按 `code` 匹配：已存在 → 更新字段；不存在 → 插入
+- `sync-delete: true` 时：YAML 中不存在但数据库存在的权限 → 级联删除
+
+### 字段说明
+| 字段 | 必填 | 说明 |
+|---|---|---|
+| `code` | ✅ | 权限编码，全局唯一，如 `system:user:add` |
+| `name` | ✅ | 权限名称 |
+| `type` | ✅ | `menu` / `button` / `api` |
+| `parentCode` | ❌ | 父权限的 code，顶级菜单省略 |
+| `icon` | ❌ | 菜单图标（Element Plus 图标名） |
+| `path` | ❌ | 路由地址，如 `/users` |
+| `component` | ❌ | 组件路径，如 `views/user/index` |
+| `sort` | ❌ | 排序，默认 0 |
+| `status` | ❌ | 1-正常 0-禁用，默认 1 |
+
+### 相关文件
+| 文件 | 职责 |
+|---|---|
+| `backend/src/main/resources/permissions.yml` | 权限定义配置 |
+| `backend/src/main/java/com/admin/config/PermissionProperties.java` | YAML 绑定（`@ConfigurationProperties`） |
+| `backend/src/main/java/com/admin/config/PermissionSyncRunner.java` | 启动同步逻辑（CommandLineRunner） |
+
 ## 常用命令
 
 ```bash

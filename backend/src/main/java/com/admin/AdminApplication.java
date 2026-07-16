@@ -1,14 +1,17 @@
 package com.admin;
 
+import com.admin.config.PermissionProperties;
 import org.mybatis.spring.annotation.MapperScan;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 
 /**
  * 后台管理系统启动类
  */
 @SpringBootApplication
 @MapperScan("com.admin.mapper")
+@EnableConfigurationProperties(PermissionProperties.class)
 public class AdminApplication {
 
     public static void main(String[] args) {
