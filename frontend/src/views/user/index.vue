@@ -25,13 +25,17 @@
         </el-form-item>
         <el-form-item label="角色">
           <el-select
-            v-model="queryForm.role"
+            v-model="queryForm.roleId"
             placeholder="全部"
             clearable
-            style="width: 120px"
+            style="width: 140px"
           >
-            <el-option label="管理员" value="admin" />
-            <el-option label="普通用户" value="user" />
+            <el-option
+              v-for="role in roleList"
+              :key="role.id"
+              :label="role.roleName"
+              :value="role.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item>
@@ -71,11 +75,17 @@
             <span>{{ genderText(row.gender) }}</span>
           </template>
         </el-table-column>
-        <el-table-column label="角色" width="100" align="center">
+        <el-table-column label="角色" min-width="180" align="center">
           <template #default="{ row }">
-            <el-tag :type="row.role === 'admin' ? 'danger' : 'info'" size="small">
-              {{ row.role === 'admin' ? '管理员' : '普通用户' }}
+            <el-tag
+              v-for="name in row.roleNames"
+              :key="name"
+              size="small"
+              style="margin: 2px"
+            >
+              {{ name }}
             </el-tag>
+            <span v-if="!row.roleNames || !row.roleNames.length" class="text-gray">未分配</span>
           </template>
         </el-table-column>
         <el-table-column label="状态" width="80" align="center">
@@ -161,9 +171,18 @@
           </el-radio-group>
         </el-form-item>
         <el-form-item label="角色">
-          <el-select v-model="formData.role" style="width: 100%">
-            <el-option label="管理员" value="admin" />
-            <el-option label="普通用户" value="user" />
+          <el-select
+            v-model="formData.roleIds"
+            multiple
+            placeholder="请选择角色"
+            style="width: 100%"
+          >
+            <el-option
+              v-for="role in roleList"
+              :key="role.id"
+              :label="role.roleName"
+              :value="role.id"
+            />
           </el-select>
         </el-form-item>
         <el-form-item label="状态">
@@ -209,10 +228,14 @@ import {
   resetPassword,
   toggleStatus
 } from '@/api/user'
+import { getRoleList } from '@/api/role'
 import { useUserStore } from '@/store/user'
 
 const userStore = useUserStore()
 const { hasPermission } = userStore
+
+// 角色列表
+const roleList = ref([])
 
 // 查询
 const queryForm = reactive({
@@ -220,7 +243,8 @@ const queryForm = reactive({
   pageSize: 10,
   keyword: '',
   status: null,
-  role: ''
+  role: '',
+  roleId: null
 })
 
 const loading = ref(false)
@@ -243,7 +267,7 @@ const formData = reactive({
   phone: '',
   gender: 0,
   status: 1,
-  role: 'user',
+  roleIds: [],
   remark: ''
 })
 
@@ -258,6 +282,16 @@ const formRules = {
   ]
 }
 
+// 加载角色列表
+const loadRoleList = async () => {
+  try {
+    const res = await getRoleList()
+    roleList.value = res.data
+  } catch (e) {
+    console.error(e)
+  }
+}
+
 // 加载数据
 const loadData = async () => {
   loading.value = true
@@ -265,6 +299,7 @@ const loadData = async () => {
     const params = { ...queryForm }
     if (!params.status && params.status !== 0) delete params.status
     if (!params.role) delete params.role
+    if (!params.roleId) delete params.roleId
     if (!params.keyword) delete params.keyword
 
     const res = await getUserPage(params)
@@ -287,6 +322,7 @@ const handleReset = () => {
   queryForm.keyword = ''
   queryForm.status = null
   queryForm.role = ''
+  queryForm.roleId = null
   queryForm.pageNum = 1
   loadData()
 }
@@ -413,7 +449,7 @@ const resetForm = () => {
     phone: '',
     gender: 0,
     status: 1,
-    role: 'user',
+    roleIds: [],
     remark: ''
   })
 }
@@ -423,6 +459,7 @@ const genderText = (g) => {
 }
 
 onMounted(() => {
+  loadRoleList()
   loadData()
 })
 </script>
@@ -445,5 +482,10 @@ onMounted(() => {
     display: flex;
     justify-content: flex-end;
   }
+}
+
+.text-gray {
+  color: #909399;
+  font-size: 12px;
 }
 </style>

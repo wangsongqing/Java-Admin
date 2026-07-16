@@ -20,6 +20,9 @@ public class UserQueryDTO {
     /** 状态 */
     private Integer status;
 
-    /** 角色 */
+    /** 角色（兼容旧字段） */
     private String role;
+
+    /** 角色ID（按角色筛选） */
+    private Long roleId;
 }

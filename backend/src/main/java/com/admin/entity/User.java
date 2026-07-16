@@ -6,6 +6,7 @@ import lombok.Data;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.List;
 
 /**
  * 用户实体
@@ -45,8 +46,16 @@ public class User implements Serializable {
     /** 状态：1-正常 0-禁用 */
     private Integer status;
 
-    /** 角色：admin-管理员 user-普通用户 */
+    /** 角色：admin-管理员 user-普通用户（保留兼容，新体系通过 roleIds 关联） */
     private String role;
+
+    /** 角色ID列表（非数据库字段，用于列表展示与编辑回显） */
+    @TableField(exist = false)
+    private List<Long> roleIds;
+
+    /** 角色名称列表（非数据库字段，用于列表展示） */
+    @TableField(exist = false)
+    private List<String> roleNames;
 
     /** 备注 */
     private String remark;

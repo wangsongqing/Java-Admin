@@ -3,6 +3,7 @@ package com.admin.service.impl;
 import cn.dev33.satoken.stp.StpUtil;
 import com.admin.dto.*;
 import com.admin.entity.User;
+import com.admin.entity.UserRole;
 import com.admin.exception.BusinessException;
 import com.admin.mapper.RolePermissionMapper;
 import com.admin.mapper.UserMapper;
@@ -18,6 +19,13 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
+
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 /**
  * 用户服务实现
@@ -102,14 +110,49 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (queryDTO.getStatus() != null) {
             wrapper.eq(User::getStatus, queryDTO.getStatus());
         }
-        // 角色筛选
-        if (StringUtils.hasText(queryDTO.getRole())) {
+        // 角色筛选（通过角色ID关联查询）
+        if (queryDTO.getRoleId() != null) {
+            wrapper.inSql(User::getId,
+                    "SELECT user_id FROM sys_user_role WHERE role_id = " + queryDTO.getRoleId());
+        } else if (StringUtils.hasText(queryDTO.getRole())) {
             wrapper.eq(User::getRole, queryDTO.getRole());
         }
         // 按创建时间倒序
         wrapper.orderByDesc(User::getCreateTime);
 
-        return page(page, wrapper);
+        page = page(page, wrapper);
+
+        // 填充角色信息
+        fillRoleInfo(page.getRecords());
+
+        return page;
+    }
+
+    /**
+     * 批量填充用户的角色信息
+     */
+    private void fillRoleInfo(List<User> users) {
+        if (users == null || users.isEmpty()) {
+            return;
+        }
+        List<Long> userIds = users.stream().map(User::getId).collect(Collectors.toList());
+        List<Map<String, Object>> roleMaps = userRoleMapper.selectRoleNamesByUserIds(userIds);
+
+        // 按 userId 分组
+        Map<Long, List<Long>> userIdToRoleIds = new HashMap<>();
+        Map<Long, List<String>> userIdToRoleNames = new HashMap<>();
+        for (Map<String, Object> map : roleMaps) {
+            Long userId = ((Number) map.get("userId")).longValue();
+            Long roleId = ((Number) map.get("roleId")).longValue();
+            String roleName = (String) map.get("roleName");
+            userIdToRoleIds.computeIfAbsent(userId, k -> new ArrayList<>()).add(roleId);
+            userIdToRoleNames.computeIfAbsent(userId, k -> new ArrayList<>()).add(roleName);
+        }
+
+        for (User user : users) {
+            user.setRoleIds(userIdToRoleIds.getOrDefault(user.getId(), Collections.emptyList()));
+            user.setRoleNames(userIdToRoleNames.getOrDefault(user.getId(), Collections.emptyList()));
+        }
     }
 
     @Override
@@ -126,8 +169,19 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtils.copyProperties(createDTO, user);
         user.setPassword(passwordEncoder.encode(createDTO.getPassword()));
 
-        // 3. 保存
+        // 3. 保存用户
         save(user);
+
+        // 4. 保存角色关联
+        if (createDTO.getRoleIds() != null && !createDTO.getRoleIds().isEmpty()) {
+            for (Long roleId : createDTO.getRoleIds()) {
+                UserRole userRole = new UserRole();
+                userRole.setUserId(user.getId());
+                userRole.setRoleId(roleId);
+                userRoleMapper.insert(userRole);
+            }
+        }
+
         log.info("创建用户成功: {}", user.getUsername());
         return user;
     }
@@ -148,10 +202,21 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         if (updateDTO.getPhone() != null) user.setPhone(updateDTO.getPhone());
         if (updateDTO.getGender() != null) user.setGender(updateDTO.getGender());
         if (updateDTO.getStatus() != null) user.setStatus(updateDTO.getStatus());
-        if (StringUtils.hasText(updateDTO.getRole())) user.setRole(updateDTO.getRole());
         if (updateDTO.getRemark() != null) user.setRemark(updateDTO.getRemark());
 
         updateById(user);
+
+        // 更新角色关联（覆盖式）
+        userRoleMapper.deleteByUserId(user.getId());
+        if (updateDTO.getRoleIds() != null && !updateDTO.getRoleIds().isEmpty()) {
+            for (Long roleId : updateDTO.getRoleIds()) {
+                UserRole userRole = new UserRole();
+                userRole.setUserId(user.getId());
+                userRole.setRoleId(roleId);
+                userRoleMapper.insert(userRole);
+            }
+        }
+
         log.info("更新用户成功: {}", user.getUsername());
         return user;
     }
@@ -169,6 +234,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
         // 不允许删除自己
         // 不允许删除超级管理员（可扩展）
+
+        // 清理角色关联
+        userRoleMapper.deleteByUserId(id);
+
         boolean result = removeById(id);
         if (result) {
             log.info("删除用户成功: {}", user.getUsername());

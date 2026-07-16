@@ -3,6 +3,8 @@ package com.admin.dto;
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 更新用户DTO
  */
@@ -22,7 +24,8 @@ public class UpdateUserDTO {
 
     private Integer status;
 
-    private String role;
+    /** 角色ID列表 */
+    private List<Long> roleIds;
 
     private String remark;
 }

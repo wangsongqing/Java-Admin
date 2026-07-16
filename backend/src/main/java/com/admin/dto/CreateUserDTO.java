@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Size;
 import lombok.Data;
 
+import java.util.List;
+
 /**
  * 创建用户DTO
  */
@@ -28,7 +30,8 @@ public class CreateUserDTO {
 
     private Integer status = 1;
 
-    private String role = "user";
+    /** 角色ID列表 */
+    private List<Long> roleIds;
 
     private String remark;
 }
