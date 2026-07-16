@@ -1,0 +1,36 @@
+# Java
+*.class
+*.jar
+*.war
+target/
+.idea/
+*.iml
+.vscode/
+.factorypath
+
+# Maven
+.mvn/
+mvnw
+mvnw.cmd
+
+# Node
+node_modules/
+dist/
+dist-ssr/
+.DS_Store
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Vite
+.vite/
+
+# Env
+.env
+.env.local
+.env.*.local
+
+# Logs
+logs/
+*.log

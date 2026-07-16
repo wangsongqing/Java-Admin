@@ -1,0 +1,74 @@
+server:
+  port: 8080
+  servlet:
+    context-path: /api
+
+spring:
+  application:
+    name: java-admin
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/java_admin?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true
+    username: root
+    password: root
+  jackson:
+    date-format: yyyy-MM-dd HH:mm:ss
+    time-zone: GMT+8
+    default-property-inclusion: non_null
+
+  # Flyway 数据库迁移配置
+  flyway:
+    enabled: true
+    # 迁移脚本位置
+    locations: classpath:db/migration
+    # 如果数据库非空，自动设置基线
+    baseline-on-migrate: true
+    # 基线版本
+    baseline-version: 0
+    # 校验迁移
+    validate-on-migrate: true
+    # 开发环境可设为 true（谨慎使用）
+    clean-disabled: true
+
+# MyBatis-Plus 配置
+mybatis-plus:
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.admin.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      id-type: auto
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+
+# Sa-Token 配置
+sa-token:
+  # token 名称（同时也是 Cookie 名称）
+  token-name: Authorization
+  # token 有效期（秒），默认 30 天。设为 86400 = 24 小时
+  timeout: 86400
+  # token 最低活跃频率（秒），超过则冻结（-2 代表不限制）
+  active-timeout: -1
+  # 是否允许同一账号并发登录（为 false 时新登录挤掉旧登录）
+  is-concurrent: true
+  # 在多人同账号登录时，是否使用相同 token
+  is-share: true
+  # token 风格
+  token-style: uuid
+  # 是否输出操作日志
+  is-log: false
+  # 无需登录即可访问的路径
+  exclude-paths:
+    - /auth/login
+    - /auth/register
+    - /error
+    - /favicon.ico
+
+# 日志
+logging:
+  level:
+    com.admin: debug
+    com.admin.mapper: debug

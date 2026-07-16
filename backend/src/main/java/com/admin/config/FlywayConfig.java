@@ -1,0 +1,93 @@
+package com.admin.config;
+
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.config.BeanFactoryPostProcessor;
+import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
+import org.springframework.boot.autoconfigure.flyway.FlywayAutoConfiguration;
+import org.springframework.context.annotation.Configuration;
+
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+import java.sql.Statement;
+
+/**
+ * Flyway 数据库迁移配置
+ *
+ * <p>职责：在 Spring 容器初始化<b>之前</b>（Flyway 自动建表之前）确保目标数据库存在。</p>
+ *
+ * <p>通过实现 {@link BeanFactoryPostProcessor}，在 {@link FlywayAutoConfiguration} 之前执行建库逻辑，
+ * 后续表结构和数据由 Spring Boot 的 Flyway 自动配置完成迁移。</p>
+ */
+@Slf4j
+@Configuration
+public class FlywayConfig implements BeanFactoryPostProcessor {
+
+    private static final String DATABASE_NAME = "java_admin";
+
+    @Override
+    public void postProcessBeanFactory(ConfigurableListableBeanFactory beanFactory) throws BeansException {
+        // 从 Environment 中读取数据源配置
+        String datasourceUrl = resolveUrl(beanFactory);
+        String username = resolveUsername(beanFactory);
+        String password = resolvePassword(beanFactory);
+
+        if (datasourceUrl == null) {
+            log.warn("⚠️ 未找到 spring.datasource.url，跳过自动建库");
+            return;
+        }
+
+        ensureDatabaseExists(datasourceUrl, username, password);
+    }
+
+    /**
+     * 确保数据库存在：
+     * 使用不带库名的 JDBC URL 连接，执行 CREATE DATABASE IF NOT EXISTS
+     */
+    private void ensureDatabaseExists(String datasourceUrl, String username, String password) {
+        // 从 jdbc:mysql://127.0.0.1:3306/java_admin?xxx 中提取 jdbc:mysql://127.0.0.1:3306
+        int slashAfterHost = datasourceUrl.indexOf("/", "jdbc:mysql://x".length());
+        String baseUrl = (slashAfterHost > 0) ? datasourceUrl.substring(0, slashAfterHost) : datasourceUrl;
+
+        String initUrl = baseUrl + "/?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true";
+
+        try (Connection conn = DriverManager.getConnection(initUrl, username, password);
+             Statement stmt = conn.createStatement()) {
+            stmt.executeUpdate(
+                    "CREATE DATABASE IF NOT EXISTS `" + DATABASE_NAME + "` "
+                            + "DEFAULT CHARACTER SET utf8mb4 "
+                            + "DEFAULT COLLATE utf8mb4_unicode_ci");
+            log.info("✅ 数据库 '{}' 已就绪（新建或已存在）", DATABASE_NAME);
+        } catch (SQLException e) {
+            log.error("❌ 自动创建数据库失败: {}", e.getMessage(), e);
+            throw new RuntimeException("无法初始化数据库: " + DATABASE_NAME, e);
+        }
+    }
+
+    // ---- 辅助方法：从 Spring Environment 读取配置 ----
+
+    private String resolveUrl(ConfigurableListableBeanFactory beanFactory) {
+        try {
+            return beanFactory.resolveEmbeddedValue("${spring.datasource.url}");
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    private String resolveUsername(ConfigurableListableBeanFactory beanFactory) {
+        try {
+            return beanFactory.resolveEmbeddedValue("${spring.datasource.username}");
+        } catch (Exception e) {
+            return "root";
+        }
+    }
+
+    private String resolvePassword(ConfigurableListableBeanFactory beanFactory) {
+        try {
+            return beanFactory.resolveEmbeddedValue("${spring.datasource.password}");
+        } catch (Exception e) {
+            return "";
+        }
+    }
+}

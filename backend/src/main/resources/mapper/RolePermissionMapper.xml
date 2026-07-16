@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.admin.mapper.RolePermissionMapper">
+
+    <select id="selectPermissionIdsByRoleId" resultType="java.lang.Long">
+        SELECT rp.permission_id
+        FROM sys_role_permission rp
+                 INNER JOIN sys_permission p ON p.id = rp.permission_id
+        WHERE rp.role_id = #{roleId}
+          AND p.deleted = 0
+          AND p.status = 1
+    </select>
+
+    <select id="selectPermissionCodesByRoleIds" resultType="java.lang.String">
+        SELECT DISTINCT p.code
+        FROM sys_role_permission rp
+                 INNER JOIN sys_permission p ON p.id = rp.permission_id
+        WHERE rp.role_id IN
+        <foreach collection="roleIds" item="roleId" open="(" separator="," close=")">
+            #{roleId}
+        </foreach>
+        AND p.deleted = 0
+        AND p.status = 1
+    </select>
+
+    <select id="selectPermissionCodesByUserId" resultType="java.lang.String">
+        SELECT DISTINCT p.code
+        FROM sys_user_role ur
+                 INNER JOIN sys_role_permission rp ON rp.role_id = ur.role_id
+                 INNER JOIN sys_permission p ON p.id = rp.permission_id
+        WHERE ur.user_id = #{userId}
+          AND p.deleted = 0
+          AND p.status = 1
+    </select>
+
+</mapper>
