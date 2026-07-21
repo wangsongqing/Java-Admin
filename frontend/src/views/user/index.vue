@@ -2,7 +2,7 @@
   <div class="user-page">
     <el-card shadow="never">
       <!-- 搜索栏 -->
-      <el-form :inline="true" :model="queryForm" class="search-form">
+      <el-form v-if="hasViewPermission" :inline="true" :model="queryForm" class="search-form">
         <el-form-item label="关键字">
           <el-input
             v-model="queryForm.keyword"
@@ -59,7 +59,7 @@
       <!-- 数据表格 -->
       <el-table
         v-loading="loading"
-        :data="tableData"
+        :data="hasViewPermission ? tableData : []"
         border
         stripe
         @selection-change="handleSelectionChange"
@@ -114,6 +114,12 @@
           </template>
         </el-table-column>
       </el-table>
+
+      <!-- 无查看权限提示 -->
+      <el-empty
+        v-if="!hasViewPermission"
+        description="暂无查看用户权限，请联系管理员"
+      />
 
       <!-- 分页 -->
       <div class="pagination">
@@ -233,6 +239,9 @@ import { useUserStore } from '@/store/user'
 
 const userStore = useUserStore()
 const { hasPermission } = userStore
+
+// 查看权限
+const hasViewPermission = hasPermission('system:user:view')
 
 // 角色列表
 const roleList = ref([])
@@ -460,7 +469,9 @@ const genderText = (g) => {
 
 onMounted(() => {
   loadRoleList()
-  loadData()
+  if (hasViewPermission) {
+    loadData()
+  }
 })
 </script>
 

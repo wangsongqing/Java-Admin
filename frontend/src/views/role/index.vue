@@ -2,7 +2,7 @@
   <div class="role-page">
     <el-card shadow="never">
       <!-- 搜索栏 -->
-      <el-form :inline="true" :model="queryForm" class="search-form">
+      <el-form v-if="hasViewPermission" :inline="true" :model="queryForm" class="search-form">
         <el-form-item label="关键字">
           <el-input
             v-model="queryForm.keyword"
@@ -28,7 +28,7 @@
       </div>
 
       <!-- 数据表格 -->
-      <el-table v-loading="loading" :data="tableData" border stripe>
+      <el-table v-loading="loading" :data="hasViewPermission ? tableData : []" border stripe>
         <el-table-column prop="id" label="ID" width="80" align="center" />
         <el-table-column prop="roleCode" label="角色编码" width="160" />
         <el-table-column prop="roleName" label="角色名称" width="160" />
@@ -56,6 +56,12 @@
         </el-table-column>
       </el-table>
     </el-card>
+
+    <!-- 无查看权限提示 -->
+    <el-empty
+      v-if="!hasViewPermission"
+      description="暂无查看角色权限，请联系管理员"
+    />
 
     <!-- 新增/编辑对话框 -->
     <el-dialog
@@ -127,6 +133,9 @@ import { getPermissionTree } from '@/api/permission'
 
 const userStore = useUserStore()
 const { hasPermission } = userStore
+
+// 查看权限
+const hasViewPermission = hasPermission('system:role:view')
 
 // 查询
 const queryForm = reactive({
@@ -289,7 +298,9 @@ const resetForm = () => {
 }
 
 onMounted(() => {
-  loadData()
+  if (hasViewPermission) {
+    loadData()
+  }
 })
 </script>
 

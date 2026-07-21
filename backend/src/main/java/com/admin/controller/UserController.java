@@ -27,6 +27,7 @@ public class UserController {
      * 分页查询用户列表
      */
     @GetMapping("/page")
+    @SaCheckPermission("system:user:view")
     public Result<Page<User>> page(UserQueryDTO queryDTO) {
         return Result.success(userService.getUserPage(queryDTO));
     }
@@ -35,6 +36,7 @@ public class UserController {
      * 根据ID查询用户
      */
     @GetMapping("/{id}")
+    @SaCheckPermission("system:user:view")
     public Result<User> getById(@PathVariable Long id) {
         return Result.success(userService.getCurrentUser(id));
     }

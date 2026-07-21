@@ -81,6 +81,24 @@ mvn spring-boot:run
 
 访问：`http://localhost:8080/api`
 
+#### 测试环境（开启 SQL 文件日志）
+
+开发/排查问题时，激活 `sql` profile，每次请求的 SQL 会实时写入 `backend/logs/sql.log`：
+
+```bash
+cd backend
+mvn spring-boot:run -Dspring-boot.run.profiles=sql
+```
+
+日志格式示例：
+```
+17:22:51.283 - ==>  Preparing: SELECT id,username,... FROM sys_user WHERE deleted=0 LIMIT ?
+17:22:51.284 - ==> Parameters: 5(Long)
+17:22:51.285 - <==      Total: 2
+```
+
+日志按天滚动，保留 7 天。生产环境无需加此参数。
+
 ### 3. 启动前端
 
 ```bash

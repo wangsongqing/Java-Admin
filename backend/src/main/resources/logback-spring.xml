@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+    Logback 配置
+
+    测试环境激活 "sql" profile（-Dspring.profiles.active=sql 或 application.yml 设置）：
+      → MyBatis SQL 额外写入 logs/sql.log 文件
+
+    生产环境不激活 sql profile：
+      → SQL 不输出（或只输出到控制台）
+-->
+<configuration>
+
+    <!-- 日志文件根目录 -->
+    <property name="LOG_PATH" value="logs"/>
+    <property name="LOG_PATTERN" value="%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"/>
+
+    <!-- 控制台输出 -->
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- SQL 文件输出（仅 sql profile 激活时生效） -->
+    <appender name="SQL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/sql.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/sql.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>7</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>%d{HH:mm:ss.SSS} - %msg%n</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <!-- 根日志：控制台输出 INFO 以上 -->
+    <root level="INFO">
+        <appender-ref ref="CONSOLE"/>
+    </root>
+
+    <!-- MyBatis Mapper 日志：DEBUG 级别（输出 SQL） -->
+    <logger name="com.admin.mapper" level="DEBUG" additivity="false">
+        <appender-ref ref="CONSOLE"/>
+    </logger>
+
+    <!-- ========== sql profile：测试环境额外写 SQL 到文件 ========== -->
+    <springProfile name="sql">
+        <logger name="com.admin.mapper" level="DEBUG" additivity="false">
+            <appender-ref ref="CONSOLE"/>
+            <appender-ref ref="SQL_FILE"/>
+        </logger>
+    </springProfile>
+
+</configuration>

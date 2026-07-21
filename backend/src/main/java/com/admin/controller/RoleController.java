@@ -28,6 +28,7 @@ public class RoleController {
      * 查询角色列表
      */
     @GetMapping("/list")
+    @SaCheckPermission("system:role:view")
     public Result<List<Role>> list(@RequestParam(required = false) String keyword) {
         return Result.success(roleService.listByKeyword(keyword));
     }
@@ -36,6 +37,7 @@ public class RoleController {
      * 根据ID查询角色
      */
     @GetMapping("/{id}")
+    @SaCheckPermission("system:role:view")
     public Result<Role> getById(@PathVariable Long id) {
         return Result.success(roleService.getById(id));
     }

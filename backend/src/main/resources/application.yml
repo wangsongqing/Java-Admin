@@ -39,7 +39,7 @@ mybatis-plus:
   type-aliases-package: com.admin.entity
   configuration:
     map-underscore-to-camel-case: true
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    log-impl: org.apache.ibatis.logging.slf4j.Slf4jImpl
   global-config:
     db-config:
       id-type: auto
@@ -75,6 +75,12 @@ permissions:
   # 是否同步删除：true = YAML 中不存在的权限会从数据库级联删除（默认 false）
   # ⚠️ 开启前请确认 YAML 是权限的唯一来源，避免误删手动配置的权限
   sync-delete: false
+
+
+# SQL 文件日志（测试环境激活 sql profile 后，SQL 写入 logs/sql.log）
+# 使用方式：命令行加 --spring.profiles.active=sql 或设置 SPRING_PROFILES_ACTIVE=sql
+sql:
+  log-path: logs/sql.log  # SQL 日志文件路径（配合 sql profile 使用）
 
 # 日志
 logging:
