@@ -44,28 +44,14 @@ public class FlywayConfig implements BeanFactoryPostProcessor {
     /**
      * 确保数据库存在：
      * 使用不带库名的 JDBC URL 连接，执行 CREATE DATABASE IF NOT EXISTS
-     *
-     * <p><b>注意：</b>建库时必须绕过 P6Spy，直接用 MySQL 原生驱动。
-     * P6Spy 是 JDBC 代理驱动，建库时数据库尚不存在，P6Spy 无法找到下游驱动。</p>
      */
     private void ensureDatabaseExists(String datasourceUrl, String username, String password) {
-        // 将 jdbc:p6spy:jdbc:mysql:// 还原为 jdbc:mysql://
-        String mysqlUrl = datasourceUrl.replace("jdbc:p6spy:", "");
-
         // 从 jdbc:mysql://127.0.0.1:3306/java_admin?xxx 中提取 jdbc:mysql://127.0.0.1:3306
         String protocolPrefix = "jdbc:mysql://";
-        int slashAfterHost = mysqlUrl.indexOf("/", protocolPrefix.length());
-        String baseUrl = (slashAfterHost > 0) ? mysqlUrl.substring(0, slashAfterHost) : mysqlUrl;
+        int slashAfterHost = datasourceUrl.indexOf("/", protocolPrefix.length());
+        String baseUrl = (slashAfterHost > 0) ? datasourceUrl.substring(0, slashAfterHost) : datasourceUrl;
 
         String initUrl = baseUrl + "/?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai&allowPublicKeyRetrieval=true";
-
-        // 显式指定 MySQL 驱动，绕过 P6Spy
-        try {
-            Class.forName("com.mysql.cj.jdbc.Driver");
-        } catch (ClassNotFoundException e) {
-            log.error("❌ 未找到 MySQL 驱动", e);
-            throw new RuntimeException("未找到 MySQL 驱动", e);
-        }
 
         try (Connection conn = DriverManager.getConnection(initUrl, username, password);
              Statement stmt = conn.createStatement()) {
