@@ -53,11 +53,12 @@ Java-Admin/
 │           ├── mapper/               # MyBatis XML
 │           │   ├── RolePermissionMapper.xml
 │           │   └── UserRoleMapper.xml
-│           └── db/migration/         # Flyway 迁移脚本（V1~V4）
+│           └── db/migration/         # Flyway 迁移脚本（V1~V5）
 │               ├── V1__Create_user_table.sql
 │               ├── V2__Insert_default_users.sql
 │               ├── V3__Rbac_tables.sql
-│               └── V4__Upgrade_password_bcrypt.sql
+│               ├── V4__Upgrade_password_bcrypt.sql
+│               └── V5__Add_user_unique_indexes.sql
 └── frontend/                         # Vue 3 前端
     └── src/
         ├── api/                      # API 请求（auth/user/role/permission）

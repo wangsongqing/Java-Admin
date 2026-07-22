@@ -14,10 +14,10 @@
         class="login-form"
         @keyup.enter="handleLogin"
       >
-        <el-form-item prop="username">
+        <el-form-item prop="account">
           <el-input
-            v-model="loginForm.username"
-            placeholder="用户名"
+            v-model="loginForm.account"
+            placeholder="用户名/邮箱/手机号"
             size="large"
             :prefix-icon="User"
           />
@@ -69,12 +69,12 @@ const loginFormRef = ref(null)
 const loading = ref(false)
 
 const loginForm = reactive({
-  username: '',
+  account: '',
   password: ''
 })
 
 const loginRules = {
-  username: [{ required: true, message: '请输入用户名', trigger: 'blur' }],
+  account: [{ required: true, message: '请输入账号', trigger: 'blur' }],
   password: [{ required: true, message: '请输入密码', trigger: 'blur' }]
 }
 

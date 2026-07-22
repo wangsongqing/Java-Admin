@@ -50,9 +50,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
-        // 1. 查询用户
+        // 1. 查询用户（支持用户名/邮箱/手机号登录）
         User user = lambdaQuery()
-                .eq(User::getUsername, loginDTO.getUsername())
+                .and(w -> w.eq(User::getUsername, loginDTO.getAccount())
+                        .or().eq(User::getEmail, loginDTO.getAccount())
+                        .or().eq(User::getPhone, loginDTO.getAccount()))
                 .one();
 
         if (user == null) {
@@ -167,6 +169,22 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         long count = lambdaQuery().eq(User::getUsername, createDTO.getUsername()).count();
         if (count > 0) {
             throw new BusinessException("用户名已存在");
+        }
+
+        // 2. 校验邮箱唯一性
+        if (StringUtils.hasText(createDTO.getEmail())) {
+            long emailCount = lambdaQuery().eq(User::getEmail, createDTO.getEmail()).count();
+            if (emailCount > 0) {
+                throw new BusinessException("邮箱已被使用");
+            }
+        }
+
+        // 3. 校验手机号唯一性
+        if (StringUtils.hasText(createDTO.getPhone())) {
+            long phoneCount = lambdaQuery().eq(User::getPhone, createDTO.getPhone()).count();
+            if (phoneCount > 0) {
+                throw new BusinessException("手机号已被使用");
+            }
         }
 
         // 2. 构造用户
