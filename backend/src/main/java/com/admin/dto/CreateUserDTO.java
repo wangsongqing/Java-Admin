@@ -34,4 +34,6 @@ public class CreateUserDTO {
     private List<Long> roleIds;
 
     private String remark;
+
+    private String city;
 }

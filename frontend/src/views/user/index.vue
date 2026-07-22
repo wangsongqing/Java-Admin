@@ -149,8 +149,8 @@
         :rules="formRules"
         label-width="80px"
       >
-        <el-form-item label="用户名" prop="username" v-if="!isEdit">
-          <el-input v-model="formData.username" placeholder="3-20个字符" />
+        <el-form-item label="用户名" prop="username">
+          <el-input v-model="formData.username" placeholder="3-20个字符" :disabled="isEdit && formData.username === 'admin'" />
         </el-form-item>
         <el-form-item label="密码" prop="password" v-if="!isEdit">
           <el-input

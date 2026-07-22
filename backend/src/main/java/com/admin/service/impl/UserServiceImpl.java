@@ -192,6 +192,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         BeanUtils.copyProperties(createDTO, user);
         user.setPassword(passwordEncoder.encode(createDTO.getPassword()));
 
+        // 空字符串归一化为 NULL，避免 email/phone 唯一索引冲突
+        if (!StringUtils.hasText(user.getEmail())) {
+            user.setEmail(null);
+        }
+        if (!StringUtils.hasText(user.getPhone())) {
+            user.setPhone(null);
+        }
+
         // 3. 保存用户
         save(user);
 
@@ -217,15 +225,30 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
             throw new BusinessException("用户不存在");
         }
 
+        // 更新用户名
+        if (StringUtils.hasText(updateDTO.getUsername())) {
+            // 校验用户名唯一性（排除自身）
+            long count = lambdaQuery()
+                    .eq(User::getUsername, updateDTO.getUsername())
+                    .ne(User::getId, user.getId())
+                    .count();
+            if (count > 0) {
+                throw new BusinessException("用户名已存在");
+            }
+            user.setUsername(updateDTO.getUsername());
+        }
+
         // 更新字段
         if (StringUtils.hasText(updateDTO.getNickname())) {
             user.setNickname(updateDTO.getNickname());
         }
-        if (updateDTO.getEmail() != null) user.setEmail(updateDTO.getEmail());
-        if (updateDTO.getPhone() != null) user.setPhone(updateDTO.getPhone());
+        // 空字符串归一化为 NULL，避免 email/phone 唯一索引冲突
+        user.setEmail(StringUtils.hasText(updateDTO.getEmail()) ? updateDTO.getEmail() : null);
+        user.setPhone(StringUtils.hasText(updateDTO.getPhone()) ? updateDTO.getPhone() : null);
         if (updateDTO.getGender() != null) user.setGender(updateDTO.getGender());
         if (updateDTO.getStatus() != null) user.setStatus(updateDTO.getStatus());
         if (updateDTO.getRemark() != null) user.setRemark(updateDTO.getRemark());
+        if (updateDTO.getCity() != null) user.setCity(updateDTO.getCity());
 
         updateById(user);
 

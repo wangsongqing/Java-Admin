@@ -14,6 +14,8 @@ public class UpdateUserDTO {
     @NotNull(message = "用户ID不能为空")
     private Long id;
 
+    private String username;
+
     private String nickname;
 
     private String email;
@@ -28,4 +30,6 @@ public class UpdateUserDTO {
     private List<Long> roleIds;
 
     private String remark;
+
+    private String city;
 }
