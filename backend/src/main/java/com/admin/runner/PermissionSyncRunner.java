@@ -1,6 +1,8 @@
-package com.admin.config;
+package com.admin.runner;
 
+import com.admin.config.PermissionProperties;
 import com.admin.entity.Permission;
+import com.admin.enums.StatusEnum;
 import com.admin.mapper.PermissionMapper;
 import com.admin.mapper.RolePermissionMapper;
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
@@ -99,7 +101,7 @@ public class PermissionSyncRunner implements CommandLineRunner {
                 permission.setPath(def.getPath());
                 permission.setComponent(def.getComponent());
                 permission.setSort(def.getSort() != null ? def.getSort() : 0);
-                permission.setStatus(def.getStatus() != null ? def.getStatus() : 1);
+                permission.setStatus(def.getStatus() != null ? def.getStatus() : StatusEnum.NORMAL.getCode());
                 permissionMapper.insert(permission);
 
                 // 记录新插入的 ID，供子权限引用
@@ -139,7 +141,7 @@ public class PermissionSyncRunner implements CommandLineRunner {
                     changed = true;
                 }
                 if (!equalsInt(existing.getStatus(), def.getStatus())) {
-                    existing.setStatus(def.getStatus() != null ? def.getStatus() : 1);
+                    existing.setStatus(def.getStatus() != null ? def.getStatus() : StatusEnum.NORMAL.getCode());
                     changed = true;
                 }
 

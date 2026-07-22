@@ -16,21 +16,34 @@ Java-Admin/
 │   └── src/main/
 │       ├── java/com/admin/
 │       │   ├── AdminApplication.java     # 启动类
-│       │   ├── controller/               # 控制器层
-│       │   ├── service/                  # 服务层
-│       │   ├── mapper/                   # 数据访问层
-│       │   ├── entity/                   # 实体类
-│       │   ├── dto/                      # 数据传输对象
-│       │   ├── config/                   # 配置类
+│       │   ├── annotation/               # 自定义注解
 │       │   ├── common/                   # 公共工具
-│       │   ├── interceptor/              # 拦截器
+│       │   ├── config/                   # 配置类
+│       │   ├── constant/                 # 常量定义
+│       │   ├── controller/               # 控制器层
+│       │   ├── dto/                      # 数据传输对象
+│       │   ├── entity/                   # 实体类
+│       │   ├── enums/                    # 枚举类
 │       │   ├── exception/                # 异常处理
-│       │   └── annotation/               # 自定义注解
+│       │   ├── interceptor/              # 拦截器
+│       │   ├── mapper/                   # 数据访问层
+│       │   ├── runner/                   # 启动运行器
+│       │   ├── security/                 # 安全相关
+│       │   ├── service/                  # 服务层
+│       │   │   └── impl/                 # 服务实现
+│       │   └── vo/                       # 视图对象
 │       └── resources/
 │           ├── application.yml           # 配置文件
+│           ├── logback-spring.xml        # 日志配置
+│           ├── permissions.yml           # 权限配置
+│           ├── mapper/                   # MyBatis XML
+│           │   ├── RolePermissionMapper.xml
+│           │   └── UserRoleMapper.xml
 │           └── db/migration/             # Flyway 迁移脚本
 │               ├── V1__Create_user_table.sql
-│               └── V2__Insert_default_users.sql
+│               ├── V2__Insert_default_users.sql
+│               ├── V3__Rbac_tables.sql
+│               └── V4__Upgrade_password_bcrypt.sql
 ├── frontend/               # 前端 Vue 3 项目
 │   ├── package.json
 │   ├── vite.config.js
@@ -39,6 +52,8 @@ Java-Admin/
 │       ├── main.js
 │       ├── App.vue
 │       ├── api/                          # API 接口
+│       ├── components/                   # 公共组件
+│       ├── directives/                   # 自定义指令
 │       ├── router/                       # 路由
 │       ├── store/                        # 状态管理
 │       ├── utils/                        # 工具函数
@@ -46,7 +61,8 @@ Java-Admin/
 │       │   ├── login/                    # 登录页
 │       │   ├── layout/                   # 布局
 │       │   ├── dashboard/                # 首页
-│       │   └── user/                     # 用户管理
+│       │   ├── user/                     # 用户管理
+│       │   └── role/                     # 角色管理
 │       └── styles/                       # 样式
 ```
 

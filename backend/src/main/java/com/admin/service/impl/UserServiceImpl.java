@@ -1,9 +1,14 @@
 package com.admin.service.impl;
 
 import cn.dev33.satoken.stp.StpUtil;
-import com.admin.dto.*;
+import com.admin.dto.CreateUserDTO;
+import com.admin.dto.LoginDTO;
+import com.admin.dto.UpdateUserDTO;
+import com.admin.dto.UserQueryDTO;
 import com.admin.entity.User;
 import com.admin.entity.UserRole;
+import com.admin.vo.LoginVO;
+import com.admin.enums.StatusEnum;
 import com.admin.exception.BusinessException;
 import com.admin.mapper.RolePermissionMapper;
 import com.admin.mapper.UserMapper;
@@ -60,7 +65,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         }
 
         // 3. 校验状态
-        if (user.getStatus() == 0) {
+        if (StatusEnum.isDisabled(user.getStatus())) {
             throw new BusinessException("账号已被禁用，请联系管理员");
         }
 

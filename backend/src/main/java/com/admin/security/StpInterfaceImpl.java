@@ -1,4 +1,4 @@
-package com.admin.config;
+package com.admin.security;
 
 import cn.dev33.satoken.stp.StpInterface;
 import com.admin.mapper.RolePermissionMapper;

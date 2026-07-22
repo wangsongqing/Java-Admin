@@ -1,4 +1,4 @@
-package com.admin.dto;
+package com.admin.vo;
 
 import lombok.Builder;
 import lombok.Data;

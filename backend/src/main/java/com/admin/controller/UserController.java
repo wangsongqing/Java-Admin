@@ -3,6 +3,8 @@ package com.admin.controller;
 import cn.dev33.satoken.annotation.SaCheckPermission;
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.admin.common.Result;
+import com.admin.constant.PermissionCode;
+import com.admin.constant.RoleCode;
 import com.admin.dto.*;
 import com.admin.entity.User;
 import com.admin.service.UserService;
@@ -17,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
  */
 @RestController
 @RequestMapping("/users")
-@SaCheckRole("ROLE_ADMIN")
+@SaCheckRole(RoleCode.ADMIN)
 @RequiredArgsConstructor
 public class UserController {
 
@@ -27,7 +29,7 @@ public class UserController {
      * 分页查询用户列表
      */
     @GetMapping("/page")
-    @SaCheckPermission("system:user:view")
+    @SaCheckPermission(PermissionCode.USER_VIEW)
     public Result<Page<User>> page(UserQueryDTO queryDTO) {
         return Result.success(userService.getUserPage(queryDTO));
     }
@@ -36,7 +38,7 @@ public class UserController {
      * 根据ID查询用户
      */
     @GetMapping("/{id}")
-    @SaCheckPermission("system:user:view")
+    @SaCheckPermission(PermissionCode.USER_VIEW)
     public Result<User> getById(@PathVariable Long id) {
         return Result.success(userService.getCurrentUser(id));
     }
@@ -45,7 +47,7 @@ public class UserController {
      * 创建用户
      */
     @PostMapping
-    @SaCheckPermission("system:user:add")
+    @SaCheckPermission(PermissionCode.USER_ADD)
     public Result<User> create(@Valid @RequestBody CreateUserDTO createDTO) {
         return Result.success("创建成功", userService.createUser(createDTO));
     }
@@ -54,7 +56,7 @@ public class UserController {
      * 更新用户
      */
     @PutMapping
-    @SaCheckPermission("system:user:edit")
+    @SaCheckPermission(PermissionCode.USER_EDIT)
     public Result<User> update(@Valid @RequestBody UpdateUserDTO updateDTO) {
         return Result.success("更新成功", userService.updateUser(updateDTO));
     }
@@ -63,7 +65,7 @@ public class UserController {
      * 删除用户
      */
     @DeleteMapping("/{id}")
-    @SaCheckPermission("system:user:delete")
+    @SaCheckPermission(PermissionCode.USER_DELETE)
     public Result<Void> delete(@PathVariable Long id) {
         userService.deleteUser(id);
         return Result.success("删除成功", null);
@@ -73,7 +75,7 @@ public class UserController {
      * 重置密码
      */
     @PutMapping("/{id}/reset-password")
-    @SaCheckPermission("system:user:reset")
+    @SaCheckPermission(PermissionCode.USER_RESET)
     public Result<Void> resetPassword(@PathVariable Long id, @RequestParam String newPassword) {
         userService.resetPassword(id, newPassword);
         return Result.success("密码重置成功", null);
@@ -83,7 +85,7 @@ public class UserController {
      * 切换用户状态
      */
     @PutMapping("/{id}/status")
-    @SaCheckPermission("system:user:status")
+    @SaCheckPermission(PermissionCode.USER_STATUS)
     public Result<Void> toggleStatus(@PathVariable Long id, @RequestParam Integer status) {
         userService.toggleStatus(id, status);
         return Result.success("状态更新成功", null);

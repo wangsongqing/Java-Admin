@@ -2,8 +2,9 @@ package com.admin.controller;
 
 import cn.dev33.satoken.stp.StpUtil;
 import com.admin.common.Result;
-import com.admin.dto.*;
+import com.admin.dto.LoginDTO;
 import com.admin.entity.User;
+import com.admin.vo.LoginVO;
 import com.admin.mapper.RolePermissionMapper;
 import com.admin.mapper.UserRoleMapper;
 import com.admin.service.UserService;

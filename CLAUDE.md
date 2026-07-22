@@ -33,20 +33,35 @@ Java-Admin/
 │       │   ├── annotation/           # 自定义注解（已清空，原 NoAuth 已移除）
 │       │   ├── common/               # 公共类（Result 统一响应）
 │       │   ├── config/               # 配置类（Sa-Token、MyBatis-Plus、Flyway）
+│       │   ├── constant/             # 常量定义
 │       │   ├── controller/           # 控制器（Auth/User/Role/Permission）
 │       │   ├── dto/                  # 数据传输对象
 │       │   ├── entity/               # 实体类（User/Role/Permission/UserRole/RolePermission）
+│       │   ├── enums/                # 枚举类
 │       │   ├── exception/            # 异常处理（BusinessException + GlobalExceptionHandler）
 │       │   ├── interceptor/          # 拦截器（已清空，原 JwtInterceptor 已移除）
 │       │   ├── mapper/               # MyBatis Mapper 接口
-│       │   └── service/              # 业务逻辑层
+│       │   ├── runner/               # 启动运行器（PermissionSyncRunner）
+│       │   ├── security/             # 安全相关（StpInterfaceImpl）
+│       │   ├── service/              # 业务逻辑层
+│       │   │   └── impl/             # 服务实现
+│       │   └── vo/                   # 视图对象
 │       └── resources/
-│           ├── db/migration/         # Flyway 迁移脚本（V1~V4）
-│           ├── mapper/               # MyBatis XML（UserRoleMapper、RolePermissionMapper）
-│           └── application.yml       # 主配置
+│           ├── application.yml       # 主配置
+│           ├── logback-spring.xml    # 日志配置
+│           ├── permissions.yml       # 权限配置
+│           ├── mapper/               # MyBatis XML
+│           │   ├── RolePermissionMapper.xml
+│           │   └── UserRoleMapper.xml
+│           └── db/migration/         # Flyway 迁移脚本（V1~V4）
+│               ├── V1__Create_user_table.sql
+│               ├── V2__Insert_default_users.sql
+│               ├── V3__Rbac_tables.sql
+│               └── V4__Upgrade_password_bcrypt.sql
 └── frontend/                         # Vue 3 前端
     └── src/
         ├── api/                      # API 请求（auth/user/role/permission）
+        ├── components/               # 公共组件
         ├── directives/               # 自定义指令（permission 按钮级权限）
         ├── router/                   # 路由配置（含权限守卫）
         ├── store/                    # Pinia 状态管理（user store）

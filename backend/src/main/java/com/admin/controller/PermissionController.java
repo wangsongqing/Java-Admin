@@ -2,6 +2,7 @@ package com.admin.controller;
 
 import cn.dev33.satoken.annotation.SaCheckRole;
 import com.admin.common.Result;
+import com.admin.constant.RoleCode;
 import com.admin.entity.Permission;
 import com.admin.service.PermissionService;
 import lombok.RequiredArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/permissions")
-@SaCheckRole("ROLE_ADMIN")
+@SaCheckRole(RoleCode.ADMIN)
 @RequiredArgsConstructor
 public class PermissionController {
 
