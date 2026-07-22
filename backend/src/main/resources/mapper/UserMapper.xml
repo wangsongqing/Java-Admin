@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.admin.mapper.UserMapper">
+
+    <!--
+        通过账号（用户名/邮箱/手机号）查询用户。
+        拆分为三条独立查询 UNION ALL，每条精确命中唯一索引（uk_username / uk_email / uk_phone），
+        避免 OR 跨列查询导致的全表扫描或 index merge 不确定性。
+
+        @TableLogic 自动追加 deleted = 0，因此无需手动过滤。
+    -->
+    <select id="selectByAccount" resultType="com.admin.entity.User">
+        SELECT * FROM sys_user WHERE username = #{account} AND deleted = 0
+        UNION ALL
+        SELECT * FROM sys_user WHERE email = #{account} AND deleted = 0
+        UNION ALL
+        SELECT * FROM sys_user WHERE phone = #{account} AND deleted = 0
+        LIMIT 1
+    </select>
+
+</mapper>

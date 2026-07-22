@@ -50,24 +50,26 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
 
     @Override
     public LoginVO login(LoginDTO loginDTO) {
+        log.info("登录请求: account={}", loginDTO.getAccount());
+
         // 1. 查询用户（支持用户名/邮箱/手机号登录）
-        User user = lambdaQuery()
-                .and(w -> w.eq(User::getUsername, loginDTO.getAccount())
-                        .or().eq(User::getEmail, loginDTO.getAccount())
-                        .or().eq(User::getPhone, loginDTO.getAccount()))
-                .one();
+        //    使用 UNION ALL 拆分三条独立查询，确保每条分别命中唯一索引，避免 OR 跨列全表扫描
+        User user = userMapper.selectByAccount(loginDTO.getAccount());
 
         if (user == null) {
+            log.warn("登录失败，账号不存在: account={}", loginDTO.getAccount());
             throw new BusinessException("用户名或密码错误");
         }
 
         // 2. 校验密码（BCrypt）
         if (!passwordEncoder.matches(loginDTO.getPassword(), user.getPassword())) {
+            log.warn("登录失败，密码错误: account={}", loginDTO.getAccount());
             throw new BusinessException("用户名或密码错误");
         }
 
         // 3. 校验状态
         if (StatusEnum.isDisabled(user.getStatus())) {
+            log.warn("登录失败，账号已禁用: account={}, userId={}", loginDTO.getAccount(), user.getId());
             throw new BusinessException("账号已被禁用，请联系管理员");
         }
 
@@ -77,6 +79,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User> implements Us
         // 5. 查询用户角色和权限
         java.util.List<String> roles = userRoleMapper.selectRoleCodesByUserId(user.getId());
         java.util.List<String> permissions = rolePermissionMapper.selectPermissionCodesByUserId(user.getId());
+
+        log.info("登录成功: userId={}, username={}, roles={}, permissions={}",
+                user.getId(), user.getUsername(), roles.size(), permissions.size());
 
         // 6. 构造返回
         return LoginVO.builder()

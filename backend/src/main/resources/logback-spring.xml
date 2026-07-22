@@ -22,6 +22,19 @@
         </encoder>
     </appender>
 
+    <!-- 应用日志文件输出（按天滚动，保留 30 天） -->
+    <appender name="FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_PATH}/app.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${LOG_PATH}/app.%d{yyyy-MM-dd}.log</fileNamePattern>
+            <maxHistory>30</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${LOG_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
     <!-- SQL 文件输出（仅 sql profile 激活时生效） -->
     <appender name="SQL_FILE" class="ch.qos.logback.core.rolling.RollingFileAppender">
         <file>${LOG_PATH}/sql.log</file>
@@ -35,12 +48,13 @@
         </encoder>
     </appender>
 
-    <!-- 根日志：控制台输出 INFO 以上 -->
+    <!-- 根日志：控制台 + 文件输出 INFO 以上 -->
     <root level="INFO">
         <appender-ref ref="CONSOLE"/>
+        <appender-ref ref="FILE"/>
     </root>
 
-    <!-- MyBatis Mapper 日志：DEBUG 级别（输出 SQL） -->
+    <!-- MyBatis Mapper 日志：DEBUG 级别（输出 SQL），不写入 app.log -->
     <logger name="com.admin.mapper" level="DEBUG" additivity="false">
         <appender-ref ref="CONSOLE"/>
     </logger>
